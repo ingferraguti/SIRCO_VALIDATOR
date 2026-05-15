@@ -1,0 +1,12 @@
+services:
+  sirco-validator:
+    build: .
+    container_name: sirco-validator
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SIRCO_INPUT_DIR=/app/data/input
+    volumes:
+      - ./data/input:/app/data/input
+    restart: unless-stopped

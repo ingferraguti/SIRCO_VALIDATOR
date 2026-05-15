@@ -21,19 +21,28 @@ export type TableDefinition = {
   fields: FieldDefinition[];
 };
 
+export type EditableFieldValue = {
+  originalValue: string;
+  currentValue: string;
+  changed: boolean;
+};
+
 export type ParsedRecord = {
   table: SircoTable;
   line: number;
   raw: string;
   recordLength: number;
   fields: Record<string, string>;
+  editableFields: Record<string, EditableFieldValue>;
   logicalKey: string;
 };
 
 export type ValidationIssue = {
   severity: "ERROR" | "WARNING";
-  table: string;
+  table: SircoTable;
+  logicalName: string;
   line: number;
+  key?: string;
   fieldCode?: string;
   fieldName?: string;
   message: string;
@@ -41,6 +50,7 @@ export type ValidationIssue = {
 };
 
 export type TableResult = {
+  table: SircoTable;
   logicalName: string;
   fileName: string;
   fileFound: boolean;
