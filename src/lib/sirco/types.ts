@@ -1,4 +1,4 @@
-export type SircoTable = "A" | "B" | "C" | "D" | "E" | "F" | "G";
+export type SircoTable = "B" | "C" | "D" | "E" | "F" | "G";
 
 export type FieldDefinition = {
   code: string;
@@ -15,24 +15,35 @@ export type FieldDefinition = {
 
 export type TableDefinition = {
   table: SircoTable;
+  logicalName: string;
   fileName: string;
   recordLength: number;
   fields: FieldDefinition[];
 };
 
+export type EditableFieldValue = {
+  originalValue: string;
+  currentValue: string;
+  changed: boolean;
+};
+
 export type ParsedRecord = {
   table: SircoTable;
+  tableLogicalName: string;
   line: number;
   raw: string;
   recordLength: number;
   fields: Record<string, string>;
+  editableFields: Record<string, EditableFieldValue>;
   logicalKey: string;
 };
 
 export type ValidationIssue = {
   severity: "ERROR" | "WARNING";
-  table: string;
+  table: SircoTable;
+  logicalName: string;
   line: number;
+  key?: string;
   fieldCode?: string;
   fieldName?: string;
   message: string;
@@ -40,6 +51,7 @@ export type ValidationIssue = {
 };
 
 export type TableResult = {
+  definition: TableDefinition;
   records: ParsedRecord[];
   issues: ValidationIssue[];
   fileStatus: "FOUND" | "MISSING";
