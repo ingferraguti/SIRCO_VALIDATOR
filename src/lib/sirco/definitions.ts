@@ -1,34 +1,30 @@
 import { TableDefinition } from "./types";
 
-const makePlaceholder = (table: TableDefinition["table"]): TableDefinition => ({
+export const SIRCO_FILE_MAP = {
+  B: { logicalName: "Ricoveri", fileName: "Ricoveri20260515.txt" },
+  C: { logicalName: "Motivi Ricovero", fileName: "MotiviRicovero20260515.txt" },
+  D: { logicalName: "Diagnosi", fileName: "Diagnosi20260515.txt" },
+  E: { logicalName: "Interventi Procedure", fileName: "InterventiProcedure20260515.txt" },
+  F: { logicalName: "Problemi socio-sanitari", fileName: "Problemisociosanitari20260515.txt" },
+  G: { logicalName: "Lesioni", fileName: "Lesioni20260515.txt" },
+} as const;
+
+const makePartial = (table: TableDefinition["table"], extraFieldCode: string, extraFieldName: string): TableDefinition => ({
   table,
-  fileName: `${table}.txt`,
-  recordLength: 1,
-  fields: [{ code: `${table}01`, name: "Placeholder", start: 1, end: 1, length: 1, type: "AN" }],
+  logicalName: SIRCO_FILE_MAP[table].logicalName,
+  fileName: SIRCO_FILE_MAP[table].fileName,
+  recordLength: 18,
+  fields: [
+    { code: `${table}01`, name: "Azienda", start: 1, end: 3, length: 3, type: "AN", required: true, key: true },
+    { code: `${table}02`, name: "Struttura", start: 4, end: 9, length: 6, type: "AN", required: true, key: true },
+    { code: `${table}03`, name: "Numero scheda", start: 10, end: 17, length: 8, type: "N", required: true, key: true },
+    { code: extraFieldCode, name: extraFieldName, start: 18, end: 18, length: 1, type: "AN" },
+  ],
 });
 
 export const tableDefinitions: Record<TableDefinition["table"], TableDefinition> = {
-  A: {
-    table: "A", fileName: "A.txt", recordLength: 120,
-    fields: [
-      { code: "A01", name: "Azienda", start: 1, end: 3, length: 3, type: "AN", required: true, key: true },
-      { code: "A02", name: "Struttura", start: 4, end: 9, length: 6, type: "AN", required: true, key: true },
-      { code: "A03", name: "Numero scheda", start: 10, end: 17, length: 8, type: "N", required: true, key: true },
-      { code: "A04", name: "Nome assistito", start: 18, end: 37, length: 20, type: "AN" },
-      { code: "A05", name: "Cognome assistito", start: 38, end: 67, length: 30, type: "AN" },
-      { code: "A06", name: "Sesso", start: 68, end: 68, length: 1, type: "AN", required: true, domain: ["1", "2"] },
-      { code: "A07", name: "Data di nascita", start: 69, end: 76, length: 8, type: "DT", required: true },
-      { code: "A08", name: "Comune di nascita", start: 77, end: 82, length: 6, type: "AN", required: true },
-      { code: "A09", name: "Comune di residenza", start: 83, end: 88, length: 6, type: "AN", required: true },
-      { code: "A10", name: "Cittadinanza", start: 89, end: 91, length: 3, type: "AN", required: true },
-      { code: "A11", name: "Codice Fiscale", start: 92, end: 107, length: 16, type: "AN" },
-      { code: "A12", name: "Stato civile", start: 108, end: 108, length: 1, type: "AN", required: true, domain: ["1","2","3","4","5","6","7","8","9"] },
-      { code: "A13", name: "Livello di istruzione", start: 109, end: 109, length: 1, type: "AN", required: true, domain: ["0","1","2","3","4","5","9"] },
-      { code: "A14", name: "Filler", start: 110, end: 120, length: 11, type: "AN", filler: true },
-    ]
-  },
   B: {
-    table: "B", fileName: "B.txt", recordLength: 97,
+    table: "B", logicalName: SIRCO_FILE_MAP.B.logicalName, fileName: SIRCO_FILE_MAP.B.fileName, recordLength: 97,
     fields: [
       { code: "B01", name: "Azienda", start: 1, end: 3, length: 3, type: "AN", required: true, key: true },
       { code: "B02", name: "Struttura", start: 4, end: 9, length: 6, type: "AN", required: true, key: true },
@@ -59,5 +55,9 @@ export const tableDefinitions: Record<TableDefinition["table"], TableDefinition>
       { code: "B27", name: "Tipo operazione", start: 97, end: 97, length: 1, type: "AN", required: true, domain: ["I","V","C"] },
     ]
   },
-  C: makePlaceholder("C"), D: makePlaceholder("D"), E: makePlaceholder("E"), F: makePlaceholder("F"), G: makePlaceholder("G"),
+  C: makePartial("C", "C04", "Progressivo motivo"),
+  D: makePartial("D", "D04", "Progressivo diagnosi"),
+  E: makePartial("E", "E04", "Progressivo intervento"),
+  F: makePartial("F", "F04", "Progressivo problema"),
+  G: makePartial("G", "G04", "Progressivo lesione"),
 };

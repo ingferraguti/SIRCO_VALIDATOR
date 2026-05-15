@@ -20,8 +20,18 @@ export function SircoDashboard() {
     <h1 className="text-2xl font-bold">SIRCO Validator MVP</h1>
     <button className="rounded bg-blue-600 px-4 py-2 text-white" onClick={run}>{loading ? "Validazione..." : "Esegui validazione"}</button>
     {data && <>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">{Object.entries(data.summary.records).map(([k,v]) => <div key={k} className="rounded border p-2">Tabella {k}: {String(v)} record</div>)}</div>
-      <p>File trovati: {data.summary.filesFound} | Errori: {data.summary.errors} | Warning: {data.summary.warnings}</p>
+      <div className="overflow-auto rounded border p-2">
+        <table className="w-full text-sm">
+          <thead><tr><th>Tabella</th><th>File fisico atteso</th><th>Stato file</th><th>Record letti</th><th>Errori</th><th>Warning</th></tr></thead>
+          <tbody>
+            {Object.entries(data.tables).map(([table, info]: any) => {
+              const issues = info.issues ?? [];
+              return <tr key={table} className="border-t"><td>{info.logicalName}</td><td>{info.fileName}</td><td>{info.fileFound ? "file trovato" : "file mancante"}</td><td>{info.records.length}</td><td>{issues.filter((i: any) => i.severity === "ERROR").length}</td><td>{issues.filter((i: any) => i.severity === "WARNING").length}</td></tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p>File trovati: {data.summary.filesFound} | File mancanti: {data.summary.filesMissing} | Errori: {data.summary.errors} | Warning: {data.summary.warnings}</p>
       <TableTabs tables={data.tables} />
       <IssuesPanel tables={data.tables} globalIssues={data.globalIssues} />
     </>}
