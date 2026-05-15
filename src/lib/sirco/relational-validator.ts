@@ -1,15 +1,40 @@
 import { ParsedRecord, SircoTable, ValidationIssue } from "./types";
 
-type MapT = Record<SircoTable, ParsedRecord[]>;
-const keySet = (records: ParsedRecord[]) => new Set(records.map((r) => r.logicalKey));
+type ParsedMap = Record<SircoTable, ParsedRecord[]>;
 
-export function validateRelations(tables: MapT): ValidationIssue[] {
+const CHILD_TABLES: SircoTable[] = ["C", "D", "E", "F", "G"];
+
+const makeProgressiveKey = (record: ParsedRecord): string => {
+  const progressive = Object.entries(record.fields)
+    .find(([fieldCode]) => fieldCode.endsWith("04"))?.[1] ?? "";
+  return `${record.logicalKey}|${progressive}`;
+};
+
+export function validateRelationsWithoutAnagrafica(tables: ParsedMap): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
-  const aKeys = keySet(tables.A); const bKeys = keySet(tables.B);
-  for (const b of tables.B) if (!aKeys.has(b.logicalKey)) issues.push({ severity:"ERROR", table:"B", line:b.line, message:"Record B senza corrispondente A", value:b.logicalKey });
-  for (const a of tables.A) if (!bKeys.has(a.logicalKey)) issues.push({ severity:"WARNING", table:"A", line:a.line, message:"Record A senza corrispondente B", value:a.logicalKey });
-  (["C","D","E","F","G"] as SircoTable[]).forEach((t) => {
-    for (const r of tables[t]) if (!bKeys.has(r.logicalKey)) issues.push({ severity:"ERROR", table:t, line:r.line, message:`Record ${t} senza corrispondente B`, value:r.logicalKey });
-  });
+  const bKeys = new Set<string>();
+
+  for (const record of tables.B) {
+    if (bKeys.has(record.logicalKey)) {
+      issues.push({ severity: "ERROR", table: "B", line: record.line, message: "Chiave duplicata in Ricoveri", value: record.logicalKey });
+    }
+    bKeys.add(record.logicalKey);
+  }
+
+  for (const table of CHILD_TABLES) {
+    const duplicateCheck = new Set<string>();
+    for (const record of tables[table]) {
+      if (!bKeys.has(record.logicalKey)) {
+        issues.push({ severity: "ERROR", table, line: record.line, message: `Record presente in ${table} ma assente in Ricoveri per la chiave ${record.logicalKey}`, value: record.logicalKey });
+      }
+
+      const progressiveKey = makeProgressiveKey(record);
+      if (duplicateCheck.has(progressiveKey)) {
+        issues.push({ severity: "ERROR", table, line: record.line, message: "Duplicato chiave + progressivo nella tabella figlia", value: progressiveKey });
+      }
+      duplicateCheck.add(progressiveKey);
+    }
+  }
+
   return issues;
 }
