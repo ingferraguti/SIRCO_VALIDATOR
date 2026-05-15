@@ -3,46 +3,47 @@ import { tableDefinitions } from "@/lib/sirco/definitions";
 import { parseFixedLengthContent } from "@/lib/sirco/parser";
 import { validateTable } from "@/lib/sirco/validator";
 import { validateRelationsWithoutAnagrafica } from "@/lib/sirco/relational-validator";
-import { readInputFile } from "@/lib/sirco/file-reader";
+import { getInputDir, readInputFile } from "@/lib/sirco/file-reader";
 import { SircoTable, TableResult, ValidationIssue } from "@/lib/sirco/types";
 
 export async function GET() {
   const tableKeys = Object.keys(tableDefinitions) as SircoTable[];
   const tables = {} as Record<SircoTable, TableResult>;
   const recordsMap = {} as Record<SircoTable, ReturnType<typeof parseFixedLengthContent>>;
-  const globalIssues: ValidationIssue[] = [];
 
   for (const table of tableKeys) {
     const def = tableDefinitions[table];
     const file = await readInputFile(def.fileName);
     if (!file.found) {
-      const severity = table === "B" ? "ERROR" : "WARNING";
-      tables[table] = {
-        logicalName: def.logicalName,
-        fileName: def.fileName,
-        fileFound: false,
-        records: [],
-        issues: [{ severity, table, line: 0, message: `File ${def.fileName} non presente nella cartella /data/input` }],
-        fileStatus: "MISSING"
-      };
+      const severity: ValidationIssue["severity"] = table === "B" ? "ERROR" : "WARNING";
+      tables[table] = { table, logicalName: def.logicalName, fileName: def.fileName, fileFound: false, records: [], issues: [{ severity, table, logicalName: def.logicalName, line: 0, message: `File ${def.fileName} non presente nella cartella ${getInputDir()}` }], fileStatus: "MISSING" };
       recordsMap[table] = [];
       continue;
     }
+
     const records = parseFixedLengthContent(file.content, def);
     const issues = validateTable(records, def);
-    tables[table] = { logicalName: def.logicalName, fileName: def.fileName, fileFound: true, records, issues, fileStatus: "FOUND" };
+    tables[table] = { table, logicalName: def.logicalName, fileName: def.fileName, fileFound: true, records, issues, fileStatus: "FOUND" };
     recordsMap[table] = records;
   }
 
-  globalIssues.push(...validateRelationsWithoutAnagrafica(recordsMap));
+  const globalIssues = validateRelationsWithoutAnagrafica(recordsMap);
   const allIssues = [...Object.values(tables).flatMap((t) => t.issues), ...globalIssues];
-  const summary = {
-    filesFound: Object.values(tables).filter((t) => t.fileStatus === "FOUND").length,
-    filesMissing: Object.values(tables).filter((t) => t.fileStatus === "MISSING").length,
-    records: Object.fromEntries(tableKeys.map((t) => [t, tables[t].records.length])),
-    errors: allIssues.filter((i) => i.severity === "ERROR").length,
-    warnings: allIssues.filter((i) => i.severity === "WARNING").length,
-  };
+  const errors = allIssues.filter((i) => i.severity === "ERROR").length;
+  const warnings = allIssues.filter((i) => i.severity === "WARNING").length;
 
-  return NextResponse.json({ tables, globalIssues, summary });
+  return NextResponse.json({
+    inputDir: getInputDir(),
+    tables,
+    globalIssues,
+    summary: {
+      totalExpectedFiles: tableKeys.length,
+      filesFound: Object.values(tables).filter((t) => t.fileStatus === "FOUND").length,
+      filesMissing: Object.values(tables).filter((t) => t.fileStatus === "MISSING").length,
+      totalRecords: Object.values(tables).reduce((acc, t) => acc + t.records.length, 0),
+      errors,
+      warnings,
+      validationStatus: errors > 0 ? "ERRORI PRESENTI" : warnings > 0 ? "WARNING" : "OK",
+    },
+  });
 }
