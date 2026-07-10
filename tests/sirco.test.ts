@@ -50,6 +50,25 @@ test("B10 deprecato accetta solo il placeholder spazio in posizione 40", () => {
   assert.ok(issues.some((i) => i.code === "INVALID_FILLER" && i.fieldCode === "B10"));
 });
 
+test("B12 deprecato accetta solo filler in posizione 42", () => {
+  const [record] = parseFixedLengthContent(b(), tableDefinitions.B);
+  assert.equal(record.fields.B12.currentValue, " ");
+
+  const invalid = makeRecord("B", { B01:"101", B02:"000001", B03:"26000001", B04:"01012026", B05:"01", B06:"1", B07:"1", B08:"05012026", B09:"00", B11:"1", B12:"X", B13:"000", B14:"100", B15:"01", B17:"1", B18:"2", B22:"01012026", B26:"01", B27:"I" });
+  const issues = validateTable(parseFixedLengthContent(invalid, tableDefinitions.B), tableDefinitions.B);
+  assert.ok(issues.some((i) => i.code === "INVALID_FILLER" && i.fieldCode === "B12"));
+});
+
+test("B06 accetta solo i valori ammessi", () => {
+  const b06 = tableDefinitions.B.fields.find((field) => field.code === "B06");
+  assert.deepEqual(b06?.domain, ["1", "5", "6", "7", "8"]);
+
+  const invalid = makeRecord("B", { B01:"101", B02:"000001", B03:"26000001", B04:"01012026", B05:"01", B06:"2", B07:"1", B08:"05012026", B09:"00", B11:"1", B13:"000", B14:"100", B15:"09", B17:"1", B18:"2", B22:"01012026", B26:"01", B27:"I" });
+  const issues = validateTable(parseFixedLengthContent(invalid, tableDefinitions.B), tableDefinitions.B);
+  assert.ok(issues.some((i) => i.code === "INVALID_DOMAIN" && i.fieldCode === "B06"));
+  assert.equal(issues.some((i) => i.code === "CROSS_FIELD" && i.fieldCode === "B15" && i.message.includes("B06=2")), false);
+});
+
 test("validazione data GGMMAAAA", () => {
   const record = makeRecord("B", { B01:"101", B02:"000001", B03:"26000001", B04:"31022026", B05:"01", B06:"1", B07:"1", B08:"05012026", B09:"00", B11:"1", B15:"01", B17:"1", B18:"2", B22:"01012026", B26:"01", B27:"I" });
   const issues = validateTable(parseFixedLengthContent(record, tableDefinitions.B), tableDefinitions.B);
