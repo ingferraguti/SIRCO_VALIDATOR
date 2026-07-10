@@ -40,6 +40,17 @@ test("blocca valori troppo lunghi senza troncare", () => {
   assert.throws(() => setFieldValue(record, tableDefinitions.B, "B17", "12"), /supera/);
 });
 
+
+test("B12 deprecato accetta solo filler in posizione 42", () => {
+  const valid = parseFixedLengthContent(b(), tableDefinitions.B);
+  assert.equal(valid[0].fields.B12.currentValue, " ");
+  assert.equal(validateTable(valid, tableDefinitions.B).some((i) => i.code === "INVALID_FILLER" && i.fieldCode === "B12"), false);
+
+  const invalidRecord = makeRecord("B", { B01:"101", B02:"000001", B03:"26000001", B04:"01012026", B05:"01", B06:"1", B07:"1", B08:"05012026", B09:"00", B11:"1", B12:"X", B13:"000", B14:"100", B15:"01", B17:"1", B18:"2", B22:"01012026", B26:"01", B27:"I" });
+  const issues = validateTable(parseFixedLengthContent(invalidRecord, tableDefinitions.B), tableDefinitions.B);
+  assert.ok(issues.some((i) => i.code === "INVALID_FILLER" && i.fieldCode === "B12"));
+});
+
 test("validazione data GGMMAAAA", () => {
   const record = makeRecord("B", { B01:"101", B02:"000001", B03:"26000001", B04:"31022026", B05:"01", B06:"1", B07:"1", B08:"05012026", B09:"00", B11:"1", B15:"01", B17:"1", B18:"2", B22:"01012026", B26:"01", B27:"I" });
   const issues = validateTable(parseFixedLengthContent(record, tableDefinitions.B), tableDefinitions.B);

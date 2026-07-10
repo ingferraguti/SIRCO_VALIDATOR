@@ -45,7 +45,7 @@ export const tableDefinitions: Record<SircoTable, TableDefinition> = {
       { code: "B09", name: "Giornate assenza temporanea", start: 38, end: 39, length: 2, type: "N", required: true },
       { code: "B10", name: "Filler", start: 40, end: 40, length: 1, type: "AN", filler: true },
       { code: "B11", name: "Segnalazione servizi sociali", start: 41, end: 41, length: 1, type: "AN", required: true, domain: ["1","2"] },
-      { code: "B12", name: "Filler", start: 42, end: 42, length: 1, type: "AN", filler: true },
+      { code: "B12", name: "Filler", start: 42, end: 42, length: 1, type: "AN", filler: true, description: "Campo deprecato: la posizione 42 del tracciato B deve contenere solo filler (spazio)." },
       { code: "B13", name: "Valutazione ADL ingresso", start: 43, end: 45, length: 3, type: "N" },
       { code: "B14", name: "Valutazione ADL dimissione", start: 46, end: 48, length: 3, type: "N" },
       { code: "B15", name: "Tipologia valutazione multidisciplinare", start: 49, end: 50, length: 2, type: "AN", required: true, domain: ["01","02","09"] },
