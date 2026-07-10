@@ -89,7 +89,6 @@ Controlli locali specifici B - Ricoveri:
 - degenza superiore a 42 giorni come warning;
 - B10, B12 e B16 filler;
 - B13 e B14 tra 000 e 100 se valorizzati;
-- B15 diverso da 09 quando B06=2;
 - B17 obbligatorio con gravità warning;
 - B18 dominio e coerenza COT B19-B21;
 - B22 valida e minore o uguale a B04;
