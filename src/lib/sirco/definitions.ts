@@ -30,6 +30,7 @@ const child = (table: SircoTable, keyName: string, keyDomain?: readonly string[]
 });
 
 const range = (from: number, to: number, width: number): string[] => Array.from({ length: to - from + 1 }, (_, i) => String(from + i).padStart(width, "0"));
+const paddedDischargeModes = ["1", "2", "3", "5", "7", "8", "9"].map((value) => value.padEnd(2, " ")).concat(["10", "11"]);
 
 export const tableDefinitions: Record<SircoTable, TableDefinition> = {
   B: {
@@ -59,7 +60,7 @@ export const tableDefinitions: Record<SircoTable, TableDefinition> = {
       { code: "B23", name: "Regione provenienza", start: 83, end: 85, length: 3, type: "AN", externalDomainCode: "regioni" },
       { code: "B24", name: "Azienda provenienza", start: 86, end: 88, length: 3, type: "AN", externalDomainCode: "aziende" },
       { code: "B25", name: "Struttura provenienza", start: 89, end: 94, length: 6, type: "AN", externalDomainCode: "strutture-sirco" },
-      { code: "B26", name: "Modalità dimissione", start: 95, end: 96, length: 2, type: "AN", required: true, domain: range(1, 11, 2) },
+      { code: "B26", name: "Modalità dimissione", start: 95, end: 96, length: 2, type: "AN", required: true, domain: paddedDischargeModes, description: "Valori ammessi: 1, 2, 3, 5, 7, 8, 9 con filler spazio in seconda posizione; 10 e 11 a due cifre. Valori 4 e 6 non ammessi." },
       { code: "B27", name: "Tipo operazione", start: 97, end: 97, length: 1, type: "AN", required: true, domain: ["I","V","C"], description: "Controlli I/V/C su banca dati regionale non verificabili localmente." },
     ],
   },
