@@ -5,6 +5,7 @@ const keyFrom = (fields: Record<string, string>, codes: readonly string[]): stri
 
 export function alignFieldValue(value: string, field: FieldDefinition): string {
   if (value.length > field.length) throw new Error(`Il valore del campo ${field.code} supera la lunghezza massima ${field.length}`);
+  if (field.filler && !/^[ ]*$/.test(value)) throw new Error(`Il campo ${field.code} ammette solo il placeholder spazio`);
   if (field.type === "N") return value.padStart(field.length, " ");
   return value.padEnd(field.length, " ");
 }

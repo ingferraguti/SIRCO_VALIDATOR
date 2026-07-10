@@ -87,7 +87,7 @@ Controlli locali specifici B - Ricoveri:
 - B04 minore o uguale a B08;
 - B09 numerico e non superiore alle giornate effettive;
 - degenza superiore a 42 giorni come warning;
-- B10, B12 e B16 filler;
+- B10 deprecato con solo placeholder spazio in posizione 40, B12 e B16 filler;
 - B13 e B14 tra 000 e 100 se valorizzati;
 - B15 diverso da 09 quando B06=2;
 - B17 obbligatorio con gravità warning;

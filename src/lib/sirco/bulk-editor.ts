@@ -31,7 +31,11 @@ export function previewBulkEdit(records: readonly ParsedRecord[], definition: Ta
     if (!field) return { recordId: record.id, previousValue: "", nextValue: "", applicable: false, error: "Campo non definito" };
     const previousValue = record.fields[request.fieldCode]?.currentValue ?? "";
     const nextValue = transform(record, field, request);
-    const error = nextValue.length > field.length ? `Valore troppo lungo (${nextValue.length}/${field.length})` : undefined;
+    const error = nextValue.length > field.length
+      ? `Valore troppo lungo (${nextValue.length}/${field.length})`
+      : field.filler && !/^[ ]*$/.test(nextValue)
+        ? `Il campo ${field.code} ammette solo il placeholder spazio`
+        : undefined;
     return { recordId: record.id, previousValue, nextValue, applicable: !error, error };
   });
   for (const row of rows) if (row.error) errors.push(`${row.recordId}: ${row.error}`);

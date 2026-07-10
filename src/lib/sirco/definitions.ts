@@ -43,7 +43,7 @@ export const tableDefinitions: Record<SircoTable, TableDefinition> = {
       { code: "B07", name: "Cadute in struttura", start: 29, end: 29, length: 1, type: "AN", required: true, domain: ["1","2"] },
       { code: "B08", name: "Data dimissione/decesso", start: 30, end: 37, length: 8, type: "DT", required: true },
       { code: "B09", name: "Giornate assenza temporanea", start: 38, end: 39, length: 2, type: "N", required: true },
-      { code: "B10", name: "Filler", start: 40, end: 40, length: 1, type: "AN", filler: true },
+      { code: "B10", name: "Placeholder B10 deprecato", start: 40, end: 40, length: 1, type: "AN", filler: true, placeholder: true, description: "Campo B10 deprecato: alla posizione 40 è ammesso solo il placeholder spazio." },
       { code: "B11", name: "Segnalazione servizi sociali", start: 41, end: 41, length: 1, type: "AN", required: true, domain: ["1","2"] },
       { code: "B12", name: "Filler", start: 42, end: 42, length: 1, type: "AN", filler: true },
       { code: "B13", name: "Valutazione ADL ingresso", start: 43, end: 45, length: 3, type: "N" },

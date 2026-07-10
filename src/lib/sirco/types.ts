@@ -13,6 +13,7 @@ export type FieldDefinition = {
   required?: boolean;
   requiredSeverity?: ValidationSeverity;
   filler?: boolean;
+  placeholder?: boolean;
   domain?: readonly string[];
   externalDomainCode?: string;
   description?: string;
