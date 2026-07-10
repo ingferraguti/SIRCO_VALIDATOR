@@ -12,8 +12,23 @@ export const parseSircoDate = (v: string): Date | null => {
 const daysInclusive = (start: Date, end: Date): number => Math.floor((end.getTime() - start.getTime()) / 86400000) + 1;
 const val = (r: ParsedRecord, code: string): string => r.fields[code]?.currentValue ?? "";
 
+const specReference = (def: TableDefinition, field?: FieldDefinition): string => {
+  const base = `PDF Specifiche Funzionali SIRCO v2.0, tracciato ${def.table} - ${def.logicalName}`;
+  if (!field) return `${base}, regole generali del tracciato e controlli del file`;
+  return `${base}, campo ${field.code} (${field.name}), posizioni ${field.start}-${field.end}, lunghezza ${field.length}, tipo ${field.type}`;
+};
+
+const issueReason = (code: ValidationIssueCode, message: string, field?: FieldDefinition, value?: string): string => {
+  const shownValue = value === undefined ? "" : ` Valore rilevato: "${value.replaceAll(" ", "·")}".`;
+  const fieldDetails = field ? ` Il campo ${field.code} deve rispettare lunghezza ${field.length}, tipo ${field.type}${field.domain ? ` e dominio ammesso [${field.domain.join(", ")}]` : ""}${field.externalDomainCode ? ` e dominio esterno ${field.externalDomainCode}` : ""}.` : "";
+  return `${message}.${fieldDetails}${shownValue}`;
+};
+
 function issue(def: TableDefinition, r: ParsedRecord | undefined, code: ValidationIssueCode, severity: ValidationSeverity, message: string, field?: FieldDefinition, value?: string): ValidationIssue {
-  return { id: `${def.table}:${r?.line ?? 0}:${code}:${field?.code ?? "record"}:${message}`, code, severity, table: def.table, logicalName: def.logicalName, line: r?.line, recordId: r?.id, relationKey: r?.relationKey, primaryKey: r?.primaryKey, key: r?.relationKey, fieldCode: field?.code, fieldName: field?.name, value, message };
+  const reason = issueReason(code, message, field, value);
+  const reference = specReference(def, field);
+  const detailedMessage = `${message} Motivo: ${reason} Riferimento per approfondire: ${reference}.`;
+  return { id: `${def.table}:${r?.line ?? 0}:${code}:${field?.code ?? "record"}:${message}`, code, severity, table: def.table, logicalName: def.logicalName, line: r?.line, recordId: r?.id, relationKey: r?.relationKey, primaryKey: r?.primaryKey, key: r?.relationKey, fieldCode: field?.code, fieldName: field?.name, value, message: detailedMessage, reason, specReference: reference };
 }
 
 const hasInvalidCharacters = (v: string): boolean => !/^[\x20-\x7EÀ-ÖØ-öø-ÿ]*$/.test(v);
