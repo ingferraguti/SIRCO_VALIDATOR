@@ -40,6 +40,16 @@ test("blocca valori troppo lunghi senza troncare", () => {
   assert.throws(() => setFieldValue(record, tableDefinitions.B, "B17", "12"), /supera/);
 });
 
+test("B10 deprecato accetta solo il placeholder spazio in posizione 40", () => {
+  const [record] = parseFixedLengthContent(b(), tableDefinitions.B);
+  assert.equal(record.fields.B10.currentValue, " ");
+  assert.throws(() => setFieldValue(record, tableDefinitions.B, "B10", "X"), /placeholder spazio/);
+
+  const invalid = makeRecord("B", { B01:"101", B02:"000001", B03:"26000001", B04:"01012026", B05:"01", B06:"1", B07:"1", B08:"05012026", B09:"00", B10:"X", B11:"1", B13:"000", B14:"100", B15:"01", B17:"1", B18:"2", B22:"01012026", B26:"01", B27:"I" });
+  const issues = validateTable(parseFixedLengthContent(invalid, tableDefinitions.B), tableDefinitions.B);
+  assert.ok(issues.some((i) => i.code === "INVALID_FILLER" && i.fieldCode === "B10"));
+});
+
 test("validazione data GGMMAAAA", () => {
   const record = makeRecord("B", { B01:"101", B02:"000001", B03:"26000001", B04:"31022026", B05:"01", B06:"1", B07:"1", B08:"05012026", B09:"00", B11:"1", B15:"01", B17:"1", B18:"2", B22:"01012026", B26:"01", B27:"I" });
   const issues = validateTable(parseFixedLengthContent(record, tableDefinitions.B), tableDefinitions.B);
