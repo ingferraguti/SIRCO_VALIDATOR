@@ -93,7 +93,7 @@ Controlli locali specifici B - Ricoveri:
 - B18 dominio e coerenza COT B19-B21;
 - B22 valida e minore o uguale a B04;
 - B23 obbligatoria quando B05 è diversa da 01;
-- B26 dominio statico e allineamento AN;
+- B26 lunghezza 2 con valori ammessi 1, 2, 3, 5, 7, 8, 9 più filler spazio e 10, 11 già a due cifre; valori 4 e 6 non ammessi;
 - B27 dominio I/V/C.
 
 Controlli locali specifici C-G:
