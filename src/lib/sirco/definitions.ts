@@ -39,7 +39,7 @@ export const tableDefinitions: Record<SircoTable, TableDefinition> = {
       ...baseFields("B"),
       { code: "B04", name: "Data ricovero", start: 18, end: 25, length: 8, type: "DT", required: true },
       { code: "B05", name: "Provenienza paziente", start: 26, end: 27, length: 2, type: "AN", required: true, domain: range(1, 9, 2) },
-      { code: "B06", name: "Proposta ricovero", start: 28, end: 28, length: 1, type: "AN", required: true, domain: ["1","2","3","4","5","6","7","8"] },
+      { code: "B06", name: "Proposta ricovero", start: 28, end: 28, length: 1, type: "AN", required: true, domain: ["1","5","6","7","8"] },
       { code: "B07", name: "Cadute in struttura", start: 29, end: 29, length: 1, type: "AN", required: true, domain: ["1","2"] },
       { code: "B08", name: "Data dimissione/decesso", start: 30, end: 37, length: 8, type: "DT", required: true },
       { code: "B09", name: "Giornate assenza temporanea", start: 38, end: 39, length: 2, type: "N", required: true },

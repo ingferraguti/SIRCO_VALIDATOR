@@ -83,7 +83,6 @@ function validateLocalTableRules(r: ParsedRecord, def: TableDefinition, context:
     if (b04 && b08 && b04.getTime() > b08.getTime()) push("CROSS_FIELD", "ERROR", "B04", "B04 deve essere minore o uguale a B08", b04s);
     if (b04 && b08 && /^\d+$/.test(b09)) { const degenza = daysInclusive(b04, b08); if (Number(b09) > degenza) push("CROSS_FIELD", "ERROR", "B09", "B09 non può superare le giornate effettive di degenza", b09); if (degenza > 42) push("CROSS_FIELD", "WARNING", "B08", "Degenza superiore a 42 giorni", String(degenza)); }
     for (const code of ["B13", "B14"]) { const v = val(r, code); if (!isBlank(v) && /^\d+$/.test(v) && Number(v) > 100) push("CROSS_FIELD", "ERROR", code, `${code} deve essere compreso tra 000 e 100`, v); }
-    if (val(r, "B06") === "2" && val(r, "B15") === "09") push("CROSS_FIELD", "ERROR", "B15", "B15 deve essere diverso da 09 quando B06=2");
     const cotFields = ["B19","B20","B21"];
     const cotCompiled = cotFields.filter((code) => !isBlank(val(r, code)));
     if (val(r, "B18") === "1" && cotCompiled.length !== cotFields.length) push("CROSS_FIELD", "ERROR", "B18", "Se B18=1 i dati COT B19, B20 e B21 devono essere tutti compilati");
