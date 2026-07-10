@@ -12,17 +12,33 @@ const CARDINALITY: Partial<Record<SircoTable, { min: number; max: number; label:
   G: { min: 0, max: 99, label: "lesioni" },
 };
 
-const makeIssue = (record: ParsedRecord, code: ValidationIssue["code"], severity: ValidationIssue["severity"], message: string): ValidationIssue => ({
-  id: `${record.table}:${record.line}:${code}:${message}`,
-  code, severity, table: record.table, logicalName: tableDefinitions[record.table].logicalName, line: record.line, recordId: record.id,
-  relationKey: record.relationKey, primaryKey: record.primaryKey, key: record.relationKey, value: record.primaryKey, message,
-});
+const relationReference = (table: SircoTable): string =>
+  `PDF Specifiche Funzionali SIRCO v2.0, tracciati relazionali B-${table}, chiave azienda/struttura/numero scheda e regole di cardinalità`;
 
-const parentIssue = (record: ParsedRecord, table: SircoTable, message: string): ValidationIssue => ({
-  id: `B:${record.line}:CARDINALITY:${table}`,
-  code: "CARDINALITY", severity: "ERROR", table: "B", logicalName: tableDefinitions.B.logicalName, line: record.line, recordId: record.id,
-  relationKey: record.relationKey, primaryKey: record.primaryKey, key: record.relationKey, value: table, message,
-});
+const withDetails = (message: string, reference: string, reason: string): string =>
+  `${message} Motivo: ${reason} Riferimento per approfondire: ${reference}.`;
+
+const makeIssue = (record: ParsedRecord, code: ValidationIssue["code"], severity: ValidationIssue["severity"], message: string): ValidationIssue => {
+  const reference = relationReference(record.table);
+  const reason = `${message}. Chiave relazione rilevata: ${record.relationKey}; chiave primaria: ${record.primaryKey}.`;
+  return {
+    id: `${record.table}:${record.line}:${code}:${message}`,
+    code, severity, table: record.table, logicalName: tableDefinitions[record.table].logicalName, line: record.line, recordId: record.id,
+    relationKey: record.relationKey, primaryKey: record.primaryKey, key: record.relationKey, value: record.primaryKey, message: withDetails(message, reference, reason),
+    reason, specReference: reference,
+  };
+};
+
+const parentIssue = (record: ParsedRecord, table: SircoTable, message: string): ValidationIssue => {
+  const reference = relationReference(table);
+  const reason = `${message}. Ricovero di riferimento: ${record.relationKey}.`;
+  return {
+    id: `B:${record.line}:CARDINALITY:${table}`,
+    code: "CARDINALITY", severity: "ERROR", table: "B", logicalName: tableDefinitions.B.logicalName, line: record.line, recordId: record.id,
+    relationKey: record.relationKey, primaryKey: record.primaryKey, key: record.relationKey, value: table, message: withDetails(message, reference, reason),
+    reason, specReference: reference,
+  };
+};
 
 export function validateRelationsWithoutAnagrafica(tables: ParsedMap): ValidationIssue[] {
   const issues: ValidationIssue[] = [];

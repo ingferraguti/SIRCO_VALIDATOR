@@ -68,6 +68,8 @@ export type ValidationIssue = {
   fieldName?: string;
   value?: string;
   message: string;
+  reason?: string;
+  specReference?: string;
 };
 
 export type TableResult = {
