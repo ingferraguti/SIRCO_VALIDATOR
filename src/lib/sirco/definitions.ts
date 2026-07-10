@@ -19,7 +19,7 @@ const child = (table: SircoTable, keyName: string, keyDomain?: readonly string[]
   table,
   logicalName: SIRCO_FILE_MAP[table].logicalName,
   filePattern: SIRCO_FILE_MAP[table].filePattern,
-  recordLength: Math.max(18, ...rest.map((f) => f.end)),
+  recordLength: Math.max(19, ...rest.map((f) => f.end)),
   primaryKeyFields: [`${table}01`, `${table}02`, `${table}03`, `${table}04`],
   parentTable: "B",
   fields: [
@@ -63,27 +63,27 @@ export const tableDefinitions: Record<SircoTable, TableDefinition> = {
       { code: "B27", name: "Tipo operazione", start: 97, end: 97, length: 1, type: "AN", required: true, domain: ["I","V","C"], description: "Controlli I/V/C su banca dati regionale non verificabili localmente." },
     ],
   },
-  C: child("C", "Motivo ricovero", ["01","02","03","04","05","06","07","08","09"], [
-    { code: "C05", name: "Motivo principale", start: 20, end: 20, length: 1, type: "AN", domain: ["1","2"] },
-    { code: "C06", name: "Filler", start: 21, end: 24, length: 4, type: "AN", filler: true },
+  C: child("C", "Motivo ricovero", ["01","02","03","04","05","06","07","08","99"], [
+    { code: "C05", name: "Motivo principale", start: 20, end: 20, length: 1, type: "AN", domain: ["1"] },
+    { code: "C06", name: "Filler", start: 21, end: 40, length: 20, type: "AN", filler: true },
   ]),
   D: child("D", "Progressivo diagnosi", range(1, 10, 2), [
-    { code: "D05", name: "Codice diagnosi", start: 20, end: 26, length: 7, type: "AN", required: true, externalDomainCode: "diagnosi" },
-    { code: "D06", name: "Filler", start: 27, end: 30, length: 4, type: "AN", filler: true },
+    { code: "D05", name: "Codice diagnosi", start: 20, end: 24, length: 5, type: "AN", required: true, externalDomainCode: "diagnosi" },
+    { code: "D06", name: "Filler", start: 25, end: 40, length: 16, type: "AN", filler: true },
   ]),
-  E: child("E", "Progressivo intervento", range(1, 20, 2), [
-    { code: "E05", name: "Codice intervento/procedura", start: 20, end: 26, length: 7, type: "AN", required: true, externalDomainCode: "procedure" },
-    { code: "E06", name: "Data intervento/procedura", start: 27, end: 34, length: 8, type: "DT" },
-    { code: "E07", name: "Filler", start: 35, end: 38, length: 4, type: "AN", filler: true },
+  E: child("E", "Progressivo intervento", range(1, 15, 2), [
+    { code: "E05", name: "Codice intervento/procedura", start: 20, end: 23, length: 4, type: "AN", required: true, externalDomainCode: "procedure" },
+    { code: "E06", name: "Data intervento/procedura", start: 24, end: 31, length: 8, type: "DT", required: true },
+    { code: "E07", name: "Filler", start: 32, end: 50, length: 19, type: "AN", filler: true, description: "Specifiche v2.0: filler da posizione 32 a 50." },
   ]),
   F: child("F", "Problema socio-familiare", range(0, 10, 2), [
-    { code: "F05", name: "Filler", start: 20, end: 24, length: 5, type: "AN", filler: true },
+    { code: "F05", name: "Filler", start: 20, end: 40, length: 21, type: "AN", filler: true },
   ]),
-  G: child("G", "Progressivo lesione", range(1, 20, 2), [
+  G: child("G", "Progressivo lesione", range(1, 99, 2), [
     { code: "G05", name: "Tipologia lesione", start: 20, end: 20, length: 1, type: "AN", required: true, domain: ["1","2","3"] },
-    { code: "G06", name: "Stadio iniziale", start: 21, end: 21, length: 1, type: "AN", domain: ["1","2","3","4","9"] },
-    { code: "G07", name: "Stadio alla dimissione", start: 22, end: 22, length: 1, type: "AN", domain: ["1","2","3","4","9"] },
-    { code: "G08", name: "Filler", start: 23, end: 26, length: 4, type: "AN", filler: true },
+    { code: "G06", name: "Stadio iniziale", start: 21, end: 22, length: 2, type: "AN", domain: ["01","02","03","04","05"] },
+    { code: "G07", name: "Stadio alla dimissione", start: 23, end: 24, length: 2, type: "AN", domain: ["00","01","02","03","04","05"] },
+    { code: "G08", name: "Filler", start: 25, end: 40, length: 16, type: "AN", filler: true },
   ]),
 };
 

@@ -69,11 +69,22 @@ function validateLocalTableRules(r: ParsedRecord, def: TableDefinition, context:
     if (b04 && b08 && /^\d+$/.test(b09)) { const degenza = daysInclusive(b04, b08); if (Number(b09) > degenza) push("CROSS_FIELD", "ERROR", "B09", "B09 non può superare le giornate effettive di degenza", b09); if (degenza > 42) push("CROSS_FIELD", "WARNING", "B08", "Degenza superiore a 42 giorni", String(degenza)); }
     for (const code of ["B13", "B14"]) { const v = val(r, code); if (!isBlank(v) && /^\d+$/.test(v) && Number(v) > 100) push("CROSS_FIELD", "ERROR", code, `${code} deve essere compreso tra 000 e 100`, v); }
     if (val(r, "B06") === "2" && val(r, "B15") === "09") push("CROSS_FIELD", "ERROR", "B15", "B15 deve essere diverso da 09 quando B06=2");
-    if (val(r, "B18") === "1" && (["B19","B20","B21"].some((code) => isBlank(val(r, code))))) push("CROSS_FIELD", "ERROR", "B18", "Se B18=1 i dati COT B19, B20 e B21 devono essere compilati");
-    if (val(r, "B18") === "2" && (["B19","B20","B21"].some((code) => !isBlank(val(r, code))))) push("CROSS_FIELD", "WARNING", "B18", "Se B18=2 i dati COT compilati non sono coerenti");
+    const cotFields = ["B19","B20","B21"];
+    const cotCompiled = cotFields.filter((code) => !isBlank(val(r, code)));
+    if (val(r, "B18") === "1" && cotCompiled.length !== cotFields.length) push("CROSS_FIELD", "ERROR", "B18", "Se B18=1 i dati COT B19, B20 e B21 devono essere tutti compilati");
+    if (val(r, "B18") === "2" && cotCompiled.length > 0) push("CROSS_FIELD", "WARNING", "B18", "Se B18=2 i dati COT B19, B20 e B21 non devono essere compilati");
+    if (cotCompiled.length > 0 && cotCompiled.length !== cotFields.length) push("CROSS_FIELD", "ERROR", "B19", "I dati COT B19, B20 e B21 sono una terna: compilare tutti i campi o lasciarli tutti vuoti");
+    if (!isBlank(val(r, "B21")) && isBlank(val(r, "B20"))) push("REQUIRED", "ERROR", "B20", "B20 obbligatorio quando è indicato il codice COT B21");
+    if (!isBlank(val(r, "B20")) && isBlank(val(r, "B19"))) push("REQUIRED", "ERROR", "B19", "B19 obbligatorio quando è indicata l'azienda COT B20");
     if (b22 && b04 && b22.getTime() > b04.getTime()) push("CROSS_FIELD", "ERROR", "B22", "B22 deve essere minore o uguale alla data di ricovero B04", b22s);
-    if (val(r, "B05") !== "01" && isBlank(val(r, "B23"))) push("REQUIRED", "ERROR", "B23", "B23 obbligatoria quando B05 è diversa da 01");
-    if (!context.referenceYear) issues.push(issue(def, r, "DATABASE_CONTROL_NOT_CHECKED", "INFO", "Controlli dipendenti da anno/periodo/invio o regole regionali su B24/B25 non eseguiti: contesto non configurato."));
+    if (isBlank(val(r, "B23"))) push("REQUIRED", "ERROR", "B23", "B23 Regione di provenienza è obbligatoria");
+    if (val(r, "B23") === "080") {
+      if (isBlank(val(r, "B24"))) push("REQUIRED", "ERROR", "B24", "B24 obbligatoria quando B23 indica una provenienza da struttura dell'Emilia-Romagna");
+      if (isBlank(val(r, "B25"))) push("REQUIRED", "ERROR", "B25", "B25 obbligatoria quando B23 indica una provenienza da struttura dell'Emilia-Romagna");
+    }
+    if (val(r, "B23") === "999" && (!isBlank(val(r, "B24")) || !isBlank(val(r, "B25")))) push("CROSS_FIELD", "WARNING", "B23", "Con B23=999 (estero/non struttura regionale) B24 e B25 dovrebbero essere vuoti");
+    if (!isBlank(val(r, "B25")) && isBlank(val(r, "B24"))) push("REQUIRED", "ERROR", "B24", "B24 obbligatoria quando è indicata la struttura di provenienza B25");
+    if (!context.referenceYear) issues.push(issue(def, r, "DATABASE_CONTROL_NOT_CHECKED", "INFO", "Controlli dipendenti da anno/periodo/invio o banca dati regionale non eseguiti: contesto non configurato."));
   }
   if (def.table === "D") {
     if (val(r, "D05") && !/^[A-Z0-9. ]+$/.test(val(r, "D05"))) push("CROSS_FIELD", "ERROR", "D05", "Codice diagnosi formalmente non coerente");
